@@ -443,6 +443,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     let _res = parse_redit_resp(reader).await?;
 
     let _res = read_rdb_file(reader).await?;
+    println!("replication: rdb file read");
     loop {
         let rec = parse_redit_resp(reader).await;
         match rec {
