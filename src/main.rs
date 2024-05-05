@@ -285,6 +285,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                     db.clients[r.client_id].chan.send(RESP::Array(a)).await?;
                 }
             }
+            println!("Trying to write response");
             write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
             println!("set: {:?} {:?}", key, value);
         }
