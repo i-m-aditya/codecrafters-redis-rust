@@ -96,6 +96,8 @@ where
             let mut line = String::new();
             r.read_line(&mut line).await?;
             let len = line.trim().parse::<usize>()?;
+
+            println!("Len: {:?}", len);
             let mut array = Vec::with_capacity(len);
             for _ in 0..len {
                 array.push(parse_redit_resp(r).await?);
