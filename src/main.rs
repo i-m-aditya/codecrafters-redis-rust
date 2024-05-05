@@ -450,6 +450,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     let _res = read_rdb_file(reader).await?;
     println!("replication: rdb file read");
     loop {
+        println!("replication: waiting for command");
         let rec = parse_redit_resp(reader).await;
         match rec {
             Ok(RESP::Array(vec)) => {
@@ -457,6 +458,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                     println!("error invalid command {vec:?}");
                     continue;
                 };
+                println!("replication: command {cmd:?}, rest: {rest:?}");
                 let res = exec_cmd(
                     99999999,
                     String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
