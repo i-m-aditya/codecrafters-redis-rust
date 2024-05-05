@@ -58,6 +58,7 @@ where
 {
     let mut buf = [0; 1];
     r.read(&mut buf).await?;
+    println!("buf: {:?}", buf);
     match buf[0] {
         b'+' => {
             let mut line = String::new();
