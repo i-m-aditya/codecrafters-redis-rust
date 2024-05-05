@@ -95,6 +95,7 @@ where
             println!("yo bitch");
             let mut line = String::new();
             r.read_line(&mut line).await?;
+            println!("Line  : {}", line);
             let len = line.trim().parse::<usize>()?;
 
             println!("Len: {:?}", len);
