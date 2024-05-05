@@ -92,6 +92,7 @@ where
             Ok(RESP::String(Bytes::from(data)))
         }
         b'*' => {
+            println!("yo bitch");
             let mut line = String::new();
             r.read_line(&mut line).await?;
             let len = line.trim().parse::<usize>()?;
@@ -470,7 +471,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                 continue;
             }
             Err(e) => {
-                println!("error cannot parse command: {e}");
+                println!("error cannot parse commandddd: {e}");
                 return Err(e);
             }
         }
