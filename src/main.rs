@@ -464,7 +464,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
         reader.read_line(&mut next_line).await?;
         println!("replication: next line: {next_line}");
         // return Ok(());
-        let rec = parse_redit_resp(reader).await;
+        let rec = parse_redis_resp(reader).await;
         match rec {
             Ok(RESP::Array(vec)) => {
                 let [RESP::String(cmd), rest @ ..] = &vec[..] else {
