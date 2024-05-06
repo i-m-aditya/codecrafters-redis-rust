@@ -555,6 +555,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
 
         println!("Offset : {}", offset);
         prev_offset = offset;
+        println!("Prtev offset: {}", prev_offset);
     }
 }
 #[derive(Debug, Clone)]
