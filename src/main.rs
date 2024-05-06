@@ -16,7 +16,8 @@ use tokio::{
     net::TcpListener,
 };
 #[derive(Debug, Clone, PartialEq, Eq)]
-// 6
+// ACKs with no commands
+
 enum RESP {
     SimpleString(String),
     Error(String),
