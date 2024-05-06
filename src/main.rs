@@ -366,7 +366,11 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
 
                 "GETACK" => {
                     println!("GEtACk");
-                    write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
+                    write_resp(
+                        RESP::SimpleString(format!("REPLCONF ACK {}", 0)),
+                        &mut writer,
+                    )
+                    .await?;
                 }
                 _ => {
                     bail!("error invalid replconf command {cmd:?} {rest:?}");
