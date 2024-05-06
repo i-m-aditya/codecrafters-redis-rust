@@ -351,7 +351,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             let [RESP::String(cmd), RESP::String(arg), _rest @ ..] = &rest[..] else {
                 bail!("error invalid replconf command {cmd:?} {rest:?}");
             };
-            println!("HEre");
+            // println!("HEre");
             match String::from_utf8(cmd.to_vec())?
                 .to_ascii_uppercase()
                 .as_str()
@@ -375,7 +375,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                 }
 
                 "GETACK" => {
-                    println!("GEtACk");
+                    // println!("GEtACk");
                     write_resp(
                         RESP::Array(vec![
                             RESP::BulkString(Bytes::from("REPLCONF")),
