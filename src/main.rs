@@ -380,7 +380,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                         RESP::Array(vec![
                             RESP::BulkString(Bytes::from("REPLCONF")),
                             RESP::BulkString(Bytes::from("ACK")),
-                            RESP::BulkString(Bytes::from(offset)),
+                            RESP::BulkString(Bytes::from(offset.to_string())),
                         ]),
                         &mut writer,
                     )
