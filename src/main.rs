@@ -509,6 +509,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
         let mut prev_offset: usize = 0;
         let rec = parse_redis_resp(reader, &mut offset).await;
         println!("Again");
+        let res;
         match rec {
             Ok(RESP::Array(vec)) => {
                 let [RESP::String(cmd), rest @ ..] = &vec[..] else {
@@ -518,7 +519,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                 println!("replication: command {cmd:?}, rest: {rest:?}");
 
                 if String::from_utf8(cmd.to_vec())?.to_ascii_uppercase() == "REPLCONF" {
-                    let res = exec_cmd(
+                    res = exec_cmd(
                         99999999,
                         String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
                         rest,
@@ -528,7 +529,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                     )
                     .await;
                 } else {
-                    let res = exec_cmd(
+                    res = exec_cmd(
                         99999999,
                         String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
                         rest,
