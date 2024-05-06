@@ -454,6 +454,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     let _res = parse_redit_resp(reader).await?;
 
     let _res = read_rdb_file(reader).await?;
+    println!("RDB file read: {:?}", _res);
     println!("replication: rdb file read");
     loop {
         println!("replication: waiting for command");
