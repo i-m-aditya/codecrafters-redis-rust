@@ -376,9 +376,9 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                     // )
                     // .await?;
                     write_resp(
-                        RESP::SimpleString(
-                            "*3\r\n$8\r\nREPLCONF\r\n$3\r\nACK\r\n$1\r\n0\r\n".to_string(),
-                        ),
+                        RESP::SimpleString(String::from(
+                            "*3\r\n$8\r\nREPLCONF\r\n$3\r\nACK\r\n$1\r\n0\r\n",
+                        )),
                         writer,
                     );
                     println!("hello");
