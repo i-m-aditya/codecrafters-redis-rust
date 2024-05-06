@@ -67,7 +67,7 @@ where
             // println!("b+");
             let mut line = String::new();
             num_of_bytes = r.read_line(&mut line).await?;
-            offset += num_of_bytes;
+            *offset += num_of_bytes;
             // FIXME: trim is too aggressive, it should only remove the trailing \r\n
             Ok(RESP::String(Bytes::from(line.trim().to_string())))
         }
@@ -75,7 +75,7 @@ where
             // println!("b-");
             let mut line = String::new();
             num_of_bytes = r.read_line(&mut line).await?;
-            offset += num_of_bytes;
+            *offset += num_of_bytes;
             // FIXME: trim is too aggressive, it should only remove the trailing \r\n
             Ok(RESP::Error(line.trim().to_string()))
         }
@@ -83,7 +83,7 @@ where
             // println!("b:");
             let mut line = String::new();
             num_of_bytes = r.read_line(&mut line).await?;
-            offset += num_of_bytes;
+            *offset += num_of_bytes;
 
             Ok(RESP::Integer(line.trim().parse::<i64>()?))
         }
@@ -91,7 +91,7 @@ where
             // println!("b$");
             let mut line = String::new();
             num_of_bytes = r.read_line(&mut line).await?;
-            offset += num_of_bytes;
+            *offset += num_of_bytes;
             let len = line.trim().parse::<isize>()?;
             if len == -1 {
                 return Ok(RESP::Null);
@@ -101,9 +101,9 @@ where
             }
             let mut data = vec![0; len as usize];
             num_of_bytes = r.read_exact(&mut data).await?;
-            offset += num_of_bytes;
+            *offset += num_of_bytes;
             num_of_bytes = r.read_line(&mut line).await?;
-            offset += num_of_bytes;
+            *offset += num_of_bytes;
             Ok(RESP::String(Bytes::from(data)))
         }
         b'*' => {
@@ -111,7 +111,7 @@ where
             // println!("yo bitch");
             let mut line = String::new();
             num_of_bytes = r.read_line(&mut line).await?;
-            offset += num_of_bytes;
+            *offset += num_of_bytes;
             let len = line.trim().parse::<usize>()?;
 
             let mut array = Vec::with_capacity(len);
