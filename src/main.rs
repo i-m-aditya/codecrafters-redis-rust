@@ -483,8 +483,8 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     println!("replication: rdb file read");
     write_resp(
         RESP::Array(vec![
-            RESP::BulkString(Bytes::from("replconf")),
-            RESP::BulkString(Bytes::from("ack")),
+            RESP::BulkString(Bytes::from("REPLCONF")),
+            RESP::BulkString(Bytes::from("ACK")),
             RESP::BulkString(Bytes::from("0")),
         ]),
         &mut writer,
