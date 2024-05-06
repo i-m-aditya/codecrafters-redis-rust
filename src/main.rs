@@ -60,7 +60,7 @@ where
     let mut buf = [0; 1];
     let mut num_of_bytes = 0;
     r.read(&mut buf).await?;
-    offset += 1;
+    *offset += 1;
     // println!("buf: {:?}", buf);
     match buf[0] {
         b'+' => {
