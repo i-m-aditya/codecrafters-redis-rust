@@ -337,6 +337,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             println!("info: {:?}", section);
         }
         "REPLCONF" => {
+            println!("replconf");
             let [RESP::String(cmd), RESP::String(arg), _rest @ ..] = &rest[..] else {
                 bail!("error invalid replconf command {cmd:?} {rest:?}");
             };
