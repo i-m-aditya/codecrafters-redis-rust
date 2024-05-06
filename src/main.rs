@@ -517,7 +517,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                 };
                 println!("replication: command {cmd:?}, rest: {rest:?}");
 
-                if cmd == b"REPLCONF" {
+                if String::from_utf8(cmd.to_vec())?.to_ascii_uppercase() == "REPLCONF" {
                     let res = exec_cmd(
                         99999999,
                         String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
