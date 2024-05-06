@@ -367,6 +367,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                 }
 
                 "GETACK" => {
+                    println!("GEtACk");
                     write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
                 }
             }
