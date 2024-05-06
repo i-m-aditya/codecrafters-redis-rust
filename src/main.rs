@@ -457,35 +457,38 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     println!("replication: rdb file read");
     loop {
         println!("replication: waiting for command");
-        let rec = parse_redit_resp(reader).await;
-        match rec {
-            Ok(RESP::Array(vec)) => {
-                let [RESP::String(cmd), rest @ ..] = &vec[..] else {
-                    println!("error invalid command {vec:?}");
-                    continue;
-                };
-                println!("replication: command {cmd:?}, rest: {rest:?}");
-                let res = exec_cmd(
-                    99999999,
-                    String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
-                    rest,
-                    &db,
-                    &mut tokio::io::sink(),
-                )
-                .await;
-                if let Err(e) = res {
-                    println!("error executing command {vec:?}: {e}");
-                }
-            }
-            Ok(v) => {
-                println!("error unknown command: {v:?}");
-                continue;
-            }
-            Err(e) => {
-                println!("error cannot parse commandddd: {e}");
-                return Err(e);
-            }
-        }
+        let mut next_line = String::new();
+        reader.read_line(&mut next_line).await?;
+        println!("replication: next line: {next_line}");
+        // let rec = parse_redit_resp(reader).await;
+        // match rec {
+        //     Ok(RESP::Array(vec)) => {
+        //         let [RESP::String(cmd), rest @ ..] = &vec[..] else {
+        //             println!("error invalid command {vec:?}");
+        //             continue;
+        //         };
+        //         println!("replication: command {cmd:?}, rest: {rest:?}");
+        //         let res = exec_cmd(
+        //             99999999,
+        //             String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
+        //             rest,
+        //             &db,
+        //             &mut tokio::io::sink(),
+        //         )
+        //         .await;
+        //         if let Err(e) = res {
+        //             println!("error executing command {vec:?}: {e}");
+        //         }
+        //     }
+        //     Ok(v) => {
+        //         println!("error unknown command: {v:?}");
+        //         continue;
+        //     }
+        //     Err(e) => {
+        //         println!("error cannot parse commandddd: {e}");
+        //         return Err(e);
+        //     }
+        // }
     }
 }
 #[derive(Debug, Clone)]
