@@ -212,6 +212,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
     db: &Arc<Mutex<Db>>,
     mut writer: &mut T,
 ) -> Result<()> {
+    println!("exec_cmd: {:?}", cmd);
     // TODO most of the returns (with ?) should be continues (so put it in a function and return Result<()>)
     match cmd.as_str() {
         "PING" => {
