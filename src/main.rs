@@ -363,13 +363,13 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                 "CAPA" => {
                     write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
                 }
-                _ => {
-                    bail!("error invalid replconf command {cmd:?} {rest:?}");
-                }
 
                 "GETACK" => {
                     println!("GEtACk");
                     write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
+                }
+                _ => {
+                    bail!("error invalid replconf command {cmd:?} {rest:?}");
                 }
             }
         }
