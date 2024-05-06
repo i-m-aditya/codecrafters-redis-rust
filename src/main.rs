@@ -53,38 +53,45 @@ where
     }
 }
 #[async_recursion]
-async fn parse_redis_resp<T>(r: &mut BufReader<T>) -> Result<RESP>
+async fn parse_redis_resp<T>(r: &mut BufReader<T>, &mut offset: usize) -> Result<RESP>
 where
     T: AsyncReadExt + Unpin + Send,
 {
     let mut buf = [0; 1];
+    let mut num_of_bytes = 0;
     r.read(&mut buf).await?;
+    offset += 1;
     // println!("buf: {:?}", buf);
     match buf[0] {
         b'+' => {
             // println!("b+");
             let mut line = String::new();
-            r.read_line(&mut line).await?;
+            num_of_bytes = r.read_line(&mut line).await?;
+            offset += num_of_bytes;
             // FIXME: trim is too aggressive, it should only remove the trailing \r\n
             Ok(RESP::String(Bytes::from(line.trim().to_string())))
         }
         b'-' => {
             // println!("b-");
             let mut line = String::new();
-            r.read_line(&mut line).await?;
+            num_of_bytes = r.read_line(&mut line).await?;
+            offset += num_of_bytes;
             // FIXME: trim is too aggressive, it should only remove the trailing \r\n
             Ok(RESP::Error(line.trim().to_string()))
         }
         b':' => {
             // println!("b:");
             let mut line = String::new();
-            r.read_line(&mut line).await?;
+            num_of_bytes = r.read_line(&mut line).await?;
+            offset += num_of_bytes;
+
             Ok(RESP::Integer(line.trim().parse::<i64>()?))
         }
         b'$' => {
             // println!("b$");
             let mut line = String::new();
-            r.read_line(&mut line).await?;
+            num_of_bytes = r.read_line(&mut line).await?;
+            offset += num_of_bytes;
             let len = line.trim().parse::<isize>()?;
             if len == -1 {
                 return Ok(RESP::Null);
@@ -93,20 +100,23 @@ where
                 return Err(anyhow::anyhow!("invalid bulk string length {len}"));
             }
             let mut data = vec![0; len as usize];
-            r.read_exact(&mut data).await?;
-            r.read_line(&mut line).await?;
+            num_of_bytes = r.read_exact(&mut data).await?;
+            offset += num_of_bytes;
+            num_of_bytes = r.read_line(&mut line).await?;
+            offset += num_of_bytes;
             Ok(RESP::String(Bytes::from(data)))
         }
         b'*' => {
             // println!("b*");
             // println!("yo bitch");
             let mut line = String::new();
-            r.read_line(&mut line).await?;
+            num_of_bytes = r.read_line(&mut line).await?;
+            offset += num_of_bytes;
             let len = line.trim().parse::<usize>()?;
 
             let mut array = Vec::with_capacity(len);
             for _ in 0..len {
-                array.push(parse_redis_resp(r).await?);
+                array.push(parse_redis_resp(r, offset).await?);
             }
             Ok(RESP::Array(array))
         }
@@ -172,16 +182,17 @@ async fn handle_client(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result<()> 
         });
         db.clients.len() - 1
     };
+    let mut offset: usize = 0;
     loop {
         tokio::select! {
-            rec = parse_redis_resp(reader) => {
+            rec = parse_redis_resp(reader, &mut offset) => {
                 match rec {
                     Ok(RESP::Array(vec)) => {
                         let [RESP::String(cmd), rest @ ..] = &vec[..] else {
                             println!("error invalid command {vec:?}");
                             continue;
                         };
-                        let res = exec_cmd(client_id, String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(), rest, &db, &mut writer).await;
+                        let res = exec_cmd(client_id, String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(), rest, &db, &offset, &mut writer).await;
                         if let Err(e) = res {
                             println!("error executing command {vec:?}: {e}");
                         }
@@ -208,6 +219,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
     cmd: String,
     rest: &[RESP],
     db: &Arc<Mutex<Db>>,
+    offset: &usize,
     mut writer: &mut T,
 ) -> Result<()> {
     println!("exec_cmd: {:?}", cmd);
@@ -368,7 +380,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                         RESP::Array(vec![
                             RESP::BulkString(Bytes::from("REPLCONF")),
                             RESP::BulkString(Bytes::from("ACK")),
-                            RESP::BulkString(Bytes::from("0")),
+                            RESP::BulkString(Bytes::from(offset)),
                         ]),
                         &mut writer,
                     )
@@ -412,11 +424,11 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
     }
     Ok(())
 }
-async fn get_resp<T>(r: &mut BufReader<T>) -> Result<String>
+async fn get_resp<T>(r: &mut BufReader<T>, &mut offset: usize) -> Result<String>
 where
     T: AsyncReadExt + Unpin + Send,
 {
-    match parse_redis_resp(r).await {
+    match parse_redis_resp(r, offset).await {
         Ok(RESP::Array(vec)) => {
             let [RESP::String(cmd)] = &vec[..] else {
                 println!("replication: expected pong, got {vec:?}");
@@ -437,8 +449,10 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     )
     .await
     .unwrap();
+
+    let mut offset: usize = 0;
     assert_eq!(
-        get_resp(reader).await?,
+        get_resp(reader, &mut offset).await?,
         "PONG",
         "replication: expected pong"
     );
@@ -452,7 +466,11 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     )
     .await
     .unwrap();
-    assert_eq!(get_resp(reader).await?, "OK", "replication: expected ok");
+    assert_eq!(
+        get_resp(reader, &mut offset).await?,
+        "OK",
+        "replication: expected ok"
+    );
     write_resp(
         RESP::Array(vec![
             RESP::BulkString(Bytes::from("replconf")),
@@ -463,7 +481,12 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     )
     .await
     .unwrap();
-    assert_eq!(get_resp(reader).await?, "OK", "replication: expected ok");
+
+    assert_eq!(
+        get_resp(reader, &mut offset).await?,
+        "OK",
+        "replication: expected ok"
+    );
     write_resp(
         RESP::Array(vec![
             RESP::BulkString(Bytes::from("psync")),
@@ -474,7 +497,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     )
     .await
     .unwrap();
-    let _res = get_resp(reader).await?;
+    let _res = get_resp(reader, &mut offset).await?;
     println!("Psync response: {:?}", _res);
     // let _res = parse_redis_resp(reader).await?;
 
@@ -496,7 +519,8 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
         // reader.read_line(&mut next_line).await?;
         // println!("replication: next line: {next_line}");
         // return Ok(());
-        let rec = parse_redis_resp(reader).await;
+        let mut offset: usize = 0;
+        let rec = parse_redis_resp(reader, &mut offset).await;
         println!("Again");
         match rec {
             Ok(RESP::Array(vec)) => {
@@ -510,6 +534,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                     String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
                     rest,
                     &db,
+                    &offset,
                     &mut writer,
                 )
                 .await;
