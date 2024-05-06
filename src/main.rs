@@ -102,10 +102,8 @@ where
             // println!("yo bitch");
             let mut line = String::new();
             r.read_line(&mut line).await?;
-            println!("Line  : {}", line);
             let len = line.trim().parse::<usize>()?;
 
-            println!("Len: {:?}", len);
             let mut array = Vec::with_capacity(len);
             for _ in 0..len {
                 array.push(parse_redis_resp(r).await?);
