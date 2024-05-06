@@ -481,6 +481,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     let _res = read_rdb_file(reader).await?;
     println!("RDB file read: {:?}", _res);
     println!("replication: rdb file read");
+    write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
     loop {
         // println!("replication: waiting for command");
         // let mut next_line = String::new();
