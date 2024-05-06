@@ -59,30 +59,30 @@ where
 {
     let mut buf = [0; 1];
     r.read(&mut buf).await?;
-    println!("buf: {:?}", buf);
+    // println!("buf: {:?}", buf);
     match buf[0] {
         b'+' => {
-            println!("b+");
+            // println!("b+");
             let mut line = String::new();
             r.read_line(&mut line).await?;
             // FIXME: trim is too aggressive, it should only remove the trailing \r\n
             Ok(RESP::String(Bytes::from(line.trim().to_string())))
         }
         b'-' => {
-            println!("b-");
+            // println!("b-");
             let mut line = String::new();
             r.read_line(&mut line).await?;
             // FIXME: trim is too aggressive, it should only remove the trailing \r\n
             Ok(RESP::Error(line.trim().to_string()))
         }
         b':' => {
-            println!("b:");
+            // println!("b:");
             let mut line = String::new();
             r.read_line(&mut line).await?;
             Ok(RESP::Integer(line.trim().parse::<i64>()?))
         }
         b'$' => {
-            println!("b$");
+            // println!("b$");
             let mut line = String::new();
             r.read_line(&mut line).await?;
             let len = line.trim().parse::<isize>()?;
@@ -98,8 +98,8 @@ where
             Ok(RESP::String(Bytes::from(data)))
         }
         b'*' => {
-            println!("b*");
-            println!("yo bitch");
+            // println!("b*");
+            // println!("yo bitch");
             let mut line = String::new();
             r.read_line(&mut line).await?;
             println!("Line  : {}", line);
