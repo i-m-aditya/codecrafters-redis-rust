@@ -517,15 +517,27 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                 };
                 println!("replication: command {cmd:?}, rest: {rest:?}");
 
-                let res = exec_cmd(
-                    99999999,
-                    String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
-                    rest,
-                    &db,
-                    &prev_offset,
-                    &mut tokio::io::sink(),
-                )
-                .await;
+                if cmd == b"REPLCONF" {
+                    let res = exec_cmd(
+                        99999999,
+                        String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
+                        rest,
+                        &db,
+                        &prev_offset,
+                        &mut writer,
+                    )
+                    .await;
+                } else {
+                    let res = exec_cmd(
+                        99999999,
+                        String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
+                        rest,
+                        &db,
+                        &prev_offset,
+                        &mut tokio::io::sink(),
+                    )
+                    .await;
+                }
                 if let Err(e) = res {
                     println!("error executing command {vec:?}: {e}");
                 }
