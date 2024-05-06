@@ -341,6 +341,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             let [RESP::String(cmd), RESP::String(arg), _rest @ ..] = &rest[..] else {
                 bail!("error invalid replconf command {cmd:?} {rest:?}");
             };
+            println!("HEre");
             match String::from_utf8(cmd.to_vec())?
                 .to_ascii_uppercase()
                 .as_str()
