@@ -53,7 +53,7 @@ where
     }
 }
 #[async_recursion]
-async fn parse_redis_resp<T>(r: &mut BufReader<T>, &mut offset: usize) -> Result<RESP>
+async fn parse_redis_resp<T>(r: &mut BufReader<T>, offset: &mut usize) -> Result<RESP>
 where
     T: AsyncReadExt + Unpin + Send,
 {
@@ -424,7 +424,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
     }
     Ok(())
 }
-async fn get_resp<T>(r: &mut BufReader<T>, &mut offset: usize) -> Result<String>
+async fn get_resp<T>(r: &mut BufReader<T>, offset: &mut usize) -> Result<String>
 where
     T: AsyncReadExt + Unpin + Send,
 {
