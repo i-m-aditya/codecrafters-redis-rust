@@ -504,21 +504,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     let _res = read_rdb_file(reader).await?;
     println!("RDB file read: {:?}", _res);
     println!("replication: rdb file read");
-    // write_resp(
-    //     RESP::Array(vec![
-    //         RESP::BulkString(Bytes::from("REPLCONF")),
-    //         RESP::BulkString(Bytes::from("ACK")),
-    //         RESP::BulkString(Bytes::from("0")),
-    //     ]),
-    //     &mut writer,
-    // )
-    // .await?;
     loop {
-        // println!("replication: waiting for command");
-        // let mut next_line = String::new();
-        // reader.read_line(&mut next_line).await?;
-        // println!("replication: next line: {next_line}");
-        // return Ok(());
         let mut offset: usize = 0;
         let mut prev_offset: usize = 0;
         let rec = parse_redis_resp(reader, &mut offset).await;
@@ -530,13 +516,14 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                     continue;
                 };
                 println!("replication: command {cmd:?}, rest: {rest:?}");
+
                 let res = exec_cmd(
                     99999999,
                     String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
                     rest,
                     &db,
                     &prev_offset,
-                    &mut writer,
+                    &mut tokio::io::sink(),
                 )
                 .await;
                 if let Err(e) = res {
