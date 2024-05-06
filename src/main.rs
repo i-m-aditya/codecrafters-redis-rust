@@ -364,6 +364,10 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                 _ => {
                     bail!("error invalid replconf command {cmd:?} {rest:?}");
                 }
+
+                "GETACK" => {
+                    write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
+                }
             }
         }
         "PSYNC" => {
@@ -384,7 +388,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             println!("psync: {:?} {:?}", id, offset);
         }
 
-        _ => {
+        cmd => {
             println!("Random eresponsse");
             write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
             bail!("error unknown cmd: {cmd:?} args: {rest:?}");
