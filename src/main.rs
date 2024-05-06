@@ -383,6 +383,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             println!("psync: {:?} {:?}", id, offset);
         }
         cmd => {
+            println!("Random eresponsse");
             write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
             bail!("error unknown cmd: {cmd:?} args: {rest:?}");
         }
