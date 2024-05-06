@@ -367,9 +367,11 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                 "GETACK" => {
                     println!("GEtACk");
                     write_resp(
-                        RESP::Array(vec![RESP::BulkString(
-                            (format!("REPLCONF ACK {}", 0)).as_bytes(),
-                        )]),
+                        RESP::Array(vec![
+                            RESP::BulkString(Bytes::from("replconf")),
+                            RESP::BulkString(Bytes::from("ack")),
+                            RESP::BulkString(Bytes::from("0")),
+                        ]),
                         &mut writer,
                     )
                     .await?;
