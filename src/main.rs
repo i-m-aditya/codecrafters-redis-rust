@@ -376,6 +376,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
 
                 "GETACK" => {
                     // println!("GEtACk");
+                    println!("GetAck offset : {}", offset);
                     write_resp(
                         RESP::Array(vec![
                             RESP::BulkString(Bytes::from("REPLCONF")),
