@@ -1,4 +1,5 @@
 use anyhow::bail;
+use anyhow::Ok;
 use anyhow::Result;
 use async_recursion::async_recursion;
 use bytes::Bytes;
@@ -462,7 +463,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
         let mut next_line = String::new();
         reader.read_line(&mut next_line).await?;
         println!("replication: next line: {next_line}");
-        break;
+        return Ok(());
         // let rec = parse_redit_resp(reader).await;
         // match rec {
         //     Ok(RESP::Array(vec)) => {
