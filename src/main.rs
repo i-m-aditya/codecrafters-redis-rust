@@ -520,6 +520,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
         // println!("replication: next line: {next_line}");
         // return Ok(());
         let mut offset: usize = 0;
+        let mut prev_offset: usize = 0;
         let rec = parse_redis_resp(reader, &mut offset).await;
         println!("Again");
         match rec {
@@ -534,7 +535,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                     String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(),
                     rest,
                     &db,
-                    &offset,
+                    &prev_offset,
                     &mut writer,
                 )
                 .await;
@@ -551,6 +552,7 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
                 return Err(e);
             }
         }
+        prev_offset = offset;
     }
 }
 #[derive(Debug, Clone)]
