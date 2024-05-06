@@ -52,7 +52,7 @@ where
     }
 }
 #[async_recursion]
-async fn parse_redit_resp<T>(r: &mut BufReader<T>) -> Result<RESP>
+async fn parse_redis_resp<T>(r: &mut BufReader<T>) -> Result<RESP>
 where
     T: AsyncReadExt + Unpin + Send,
 {
@@ -107,7 +107,7 @@ where
             println!("Len: {:?}", len);
             let mut array = Vec::with_capacity(len);
             for _ in 0..len {
-                array.push(parse_redit_resp(r).await?);
+                array.push(parse_redis_resp(r).await?);
             }
             Ok(RESP::Array(array))
         }
@@ -175,7 +175,7 @@ async fn handle_client(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result<()> 
     };
     loop {
         tokio::select! {
-            rec = parse_redit_resp(reader) => {
+            rec = parse_redis_resp(reader) => {
                 match rec {
                     Ok(RESP::Array(vec)) => {
                         let [RESP::String(cmd), rest @ ..] = &vec[..] else {
@@ -392,7 +392,7 @@ async fn get_resp<T>(r: &mut BufReader<T>) -> Result<String>
 where
     T: AsyncReadExt + Unpin + Send,
 {
-    match parse_redit_resp(r).await {
+    match parse_redis_resp(r).await {
         Ok(RESP::Array(vec)) => {
             let [RESP::String(cmd)] = &vec[..] else {
                 println!("replication: expected pong, got {vec:?}");
@@ -451,7 +451,8 @@ async fn handle_replication(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result
     .await
     .unwrap();
     let _res = get_resp(reader).await?;
-    let _res = parse_redit_resp(reader).await?;
+    println!("Psync response: {:?}", _res);
+    // let _res = parse_redis_resp(reader).await?;
 
     let _res = read_rdb_file(reader).await?;
     println!("RDB file read: {:?}", _res);
