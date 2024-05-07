@@ -414,7 +414,15 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
         }
         "WAIT" => {
             println!("Restt : {:?}", rest);
-            write_resp(RESP::Integer(0), &mut writer).await?;
+            let [RESP::SimpleString(val), _rest @ ..] = rest else {
+                bail!("error invalid replconf command {cmd:?} {rest:?}");
+            };
+            println!("Val is {}", val);
+            if val.as_str() == "0" {
+                write_resp(RESP::Integer(0), &mut writer).await?;
+            } else {
+                write_resp(RESP::Integer(7), &mut writer).await?;
+            }
         }
         cmd => {
             println!("Random eresponsse");
