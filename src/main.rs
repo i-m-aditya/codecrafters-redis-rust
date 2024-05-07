@@ -386,13 +386,6 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                         &mut writer,
                     )
                     .await?;
-                    // write_resp(
-                    //     RESP::SimpleString(String::from(
-                    //         "*3\r\n$8\r\nREPLCONF\r\n$3\r\nACK\r\n$1\r\n0\r\n",
-                    //     )),
-                    //     writer,
-                    // );
-                    // println!("hello");
                 }
                 _ => {
                     bail!("error invalid replconf command {cmd:?} {rest:?}");
@@ -416,7 +409,10 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             writer.write_all(&empty_rdb).await?;
             println!("psync: {:?} {:?}", id, offset);
         }
-
+        "WAIT" => {
+            println!("Rest : {:?}", rest);
+            write_resp(RESP::Array(vec![RESP::Integer(0)]), writer);
+        }
         cmd => {
             println!("Random eresponsse");
             write_resp(RESP::SimpleString(String::from("OK")), &mut writer).await?;
