@@ -192,6 +192,8 @@ async fn handle_client(mut stream: TcpStream, db: Arc<Mutex<Db>>) -> Result<()> 
                             println!("error invalid command {vec:?}");
                             continue;
                         };
+
+                        println!("Direct execution");
                         let res = exec_cmd(client_id, String::from_utf8(cmd.to_vec())?.to_ascii_uppercase(), rest, &db, &offset, &mut writer).await;
                         if let Err(e) = res {
                             println!("error executing command {vec:?}: {e}");
