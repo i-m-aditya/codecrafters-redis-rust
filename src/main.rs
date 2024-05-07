@@ -417,12 +417,16 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             let [RESP::String(val), _rest @ ..] = rest else {
                 bail!("error invalid replconf command {cmd:?} {rest:?}");
             };
+            let mut db = db.lock().await;
+
+            let replicas_count = db.clients.len();
+            println!("Replica count: {}", replicas_count);
             // println!("Val is {}", val);
             if String::from_utf8(val.to_vec())?.as_str() == "0" {
                 write_resp(RESP::Integer(0), &mut writer).await?;
             } else {
                 println!("Gere");
-                write_resp(RESP::Integer(7), &mut writer).await?;
+                write_resp(RESP::Integer(replicas_count), &mut writer).await?;
             }
         }
         cmd => {
