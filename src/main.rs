@@ -417,7 +417,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             let [RESP::String(val), _rest @ ..] = rest else {
                 bail!("error invalid replconf command {cmd:?} {rest:?}");
             };
-            println!("Val is {}", val);
+            // println!("Val is {}", val);
             if String::from_utf8(val.to_vec())?.as_str() == "0" {
                 write_resp(RESP::Integer(0), &mut writer).await?;
             } else {
