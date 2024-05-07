@@ -133,6 +133,7 @@ async fn write_resp<T: AsyncWriteExt + Unpin + Send>(resp: RESP, writer: &mut T)
             writer.write_all(format!("-{}\r\n", e).as_bytes()).await?;
         }
         RESP::Integer(i) => {
+            println!("Helo");
             writer.write_all(format!(":{}\r\n", i).as_bytes()).await?;
         }
         RESP::BulkString(b) => {
