@@ -413,8 +413,8 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             println!("psync: {:?} {:?}", id, offset);
         }
         "WAIT" => {
-            println!("Rest : {:?}", rest);
-            write_resp(RESP::Integer(0), &mut writer);
+            println!("Restt : {:?}", rest);
+            write_resp(RESP::Integer(0), &mut writer).await?;
         }
         cmd => {
             println!("Random eresponsse");
