@@ -421,6 +421,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
             if val.as_str() == "0" {
                 write_resp(RESP::Integer(0), &mut writer).await?;
             } else {
+                println!("Gere");
                 write_resp(RESP::Integer(7), &mut writer).await?;
             }
         }
