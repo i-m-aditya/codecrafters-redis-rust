@@ -414,7 +414,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
         }
         "WAIT" => {
             println!("Restt : {:?}", rest);
-            let [RESP::SimpleString(val), _rest @ ..] = rest else {
+            let [RESP::String(val), _rest @ ..] = rest else {
                 bail!("error invalid replconf command {cmd:?} {rest:?}");
             };
             println!("Val is {}", val);
