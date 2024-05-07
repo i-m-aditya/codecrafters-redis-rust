@@ -418,7 +418,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                 bail!("error invalid replconf command {cmd:?} {rest:?}");
             };
             println!("Val is {}", val);
-            if val.as_str() == "0" {
+            if String::from_utf8(cmd.to_vec())?.as_str() == "0" {
                 write_resp(RESP::Integer(0), &mut writer).await?;
             } else {
                 println!("Gere");
