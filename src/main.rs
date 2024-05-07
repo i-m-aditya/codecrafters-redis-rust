@@ -426,7 +426,7 @@ async fn exec_cmd<T: AsyncWriteExt + Unpin + Send>(
                 write_resp(RESP::Integer(0), &mut writer).await?;
             } else {
                 println!("Gere");
-                write_resp(RESP::Integer(replicas_count - 1 as i64), &mut writer).await?;
+                write_resp(RESP::Integer((replicas_count - 1) as i64), &mut writer).await?;
             }
         }
         cmd => {
